@@ -14,23 +14,27 @@ TODOS = {
 }
 
 parser = reqparse.RequestParser()
-parser.add_argument("task")
+parser.add_argument("task", location = "form")
+
+def abort_if_todo_doesnt_exist(todo_id):
+	if todo_id not in TODOS:
+		abort(404, message="Todo {} doesn't exist".format(todo_id))
 
 # 改下边的内容，应用url shortener
 class Todo(Resource):
 	# e.g. 127.0.0.1:5000/todos/todo1
-	# Retrieve information
+	# Retrieve information test ok
 	def get(self, todo_id):
 		abort_if_todo_doesnt_exist(todo_id)
 		return TODOS[todo_id], 301
 
-	# Delete information
+	# Delete information test ok
 	def delete(self, todo_id):
 		abort_if_todo_doesnt_exist(todo_id)
 		del TODOS[todo_id]
 		return '', 204
 
-	# Create information
+	# Create information test ok
 	def put(self, todo_id):
 		args = parser.parse_args()
 		task = {'task': args['task']}
@@ -39,11 +43,11 @@ class Todo(Resource):
 
 class TodoList(Resource):
 	# e.g. 127.0.0.1:5000/todos
-	# Retrieve information
+	# Retrieve information test ok
 	def get(self):
 		return TODOS
 
-	# Update information
+	# Update information test ok
 	def post(self):
 		args = parser.parse_args()
 		todo_id = int(max(TODOS.keys()).lstrip('todo')) + 1
@@ -96,3 +100,6 @@ def get_hash_key(long_url):
     return hkeys 
 
 #print(get_hash_key("https://www.baidu.com/"))
+
+if __name__ == "__main__":
+	app.run(debug = True)
