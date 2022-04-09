@@ -34,7 +34,7 @@ class Todo(Resource):
 		del TODOS[todo_id]
 		return '', 204
 
-	# Create information test ok
+	# Update information test ok
 	def put(self, todo_id):
 		args = parser.parse_args()
 		task = {'task': args['task']}
@@ -47,7 +47,7 @@ class TodoList(Resource):
 	def get(self):
 		return TODOS
 
-	# Update information test ok
+	# Create information test ok
 	def post(self):
 		args = parser.parse_args()
 		todo_id = int(max(TODOS.keys()).lstrip('todo')) + 1
