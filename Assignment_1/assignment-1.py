@@ -6,65 +6,6 @@ import hashlib
 app = Flask(__name__)
 api = Api(app)
 
-# 改成需要的操作
-TODOS = {
-	"todo1": {"task": "test task1"},
-	"todo2": {"task": "test task2"},
-	"todo3": {"task": "test task3"},
-}
-
-parser = reqparse.RequestParser()
-parser.add_argument("task", location = "form")
-
-def abort_if_todo_doesnt_exist(todo_id):
-	if todo_id not in TODOS:
-		abort(404, message="Todo {} doesn't exist".format(todo_id))
-
-# 改下边的内容，应用url shortener
-class Todo(Resource):
-	# e.g. 127.0.0.1:5000/todos/todo1
-	# Retrieve information test ok
-	def get(self, todo_id):
-		abort_if_todo_doesnt_exist(todo_id)
-		return TODOS[todo_id], 301
-
-	# Delete information test ok
-	def delete(self, todo_id):
-		abort_if_todo_doesnt_exist(todo_id)
-		del TODOS[todo_id]
-		return '', 204
-
-	# Update information test ok
-	def put(self, todo_id):
-		args = parser.parse_args()
-		task = {'task': args['task']}
-		TODOS[todo_id] = task
-		return task, 200
-
-class TodoList(Resource):
-	# e.g. 127.0.0.1:5000/todos
-	# Retrieve information test ok
-	def get(self):
-		return TODOS
-
-	# Create information test ok
-	def post(self):
-		args = parser.parse_args()
-		todo_id = int(max(TODOS.keys()).lstrip('todo')) + 1
-		todo_id = 'todo%i' % todo_id
-		TODOS[todo_id] = {'task': args['task']}
-		return TODOS[todo_id], 201
-
-# flask route
-api.add_resource(TodoList, '/todos')
-api.add_resource(Todo, '/todos/<todo_id>')
-
-
-
-
-# 以下是url shortener所需操作
-#url_map = {}
-
 def get_md5(s):
 	s = s.encode("utf8")
 	m = hashlib.md5()
@@ -99,7 +40,55 @@ def get_hash_key(long_url):
         hkeys.append(''.join(v))  
     return hkeys 
 
-#print(get_hash_key("https://www.baidu.com/"))
+
+# {Shortened_url : {url: Original_url}}
+map_url = {}
+
+parser = reqparse.RequestParser()
+parser.add_argument("url", location = "form")
+
+def abort_if_todo_doesnt_exist(short_url):
+	if short_url not in map_url:
+		abort(404, message="Short url " + short_url + " doesn't exist")
+
+class Todo(Resource):
+	# e.g. 127.0.0.1:5000/map_url/short_url
+	# Retrieve original url from short url given
+	def get(self, short_url):
+		abort_if_todo_doesnt_exist(short_url)
+		return map_url[short_url], 301
+
+	# Delete a shortened url
+	def delete(self, short_url):
+		abort_if_todo_doesnt_exist(short_url)
+		del map_url[short_url]
+		return '', 204
+
+	# Update url map
+	def put(self, short_url):
+		args = parser.parse_args()
+		task = {'url': args['url']}
+		map_url[short_url] = task
+		return task, 200
+
+class TodoList(Resource):
+	# e.g. 127.0.0.1:5000/map_url
+	# Retrieve all url map
+	def get(self):
+		return map_url
+
+	# Create shortened url
+	def post(self):
+		args = parser.parse_args()
+		short_url = get_hash_key(args['url'])
+		#short_url = int(max(map_url.keys()).lstrip('todo')) + 1
+		short_url = short_url[0]# For test
+		map_url[short_url] = {'url': args['url']}
+		return map_url[short_url], 201
+
+# flask route
+api.add_resource(TodoList, '/map_url')
+api.add_resource(Todo, '/map_url/<short_url>')
 
 if __name__ == "__main__":
 	app.run(debug = True)
