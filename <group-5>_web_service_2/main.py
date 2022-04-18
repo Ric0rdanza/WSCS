@@ -99,10 +99,10 @@ class WithId(Resource):
 		if "Authorization" in request.headers:
 			token = request.headers["Authorization"]
 		else:
-			return 403
+			return "forbidden", 403
 		uid = is_token_valid(token)
 		if not uid:
-			return 403
+			return "forbidden", 403
 		# short url not exists
 		if id not in map_url:
 			return "error", 404
