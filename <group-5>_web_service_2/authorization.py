@@ -59,16 +59,10 @@ class Status(Resource):
         if users[args["username"]] == args["password"]:
             return args["username"], 200
         return 401
-
-class Test(Resource):
-    def get(self):
-        return users, 200
     
 api.add_resource(Signup, '/users')
 api.add_resource(Login, '/users/login')
 api.add_resource(Status, '/verify')
-
-api.add_resource(Test, '/test')
 
 if __name__ == "__main__":
     app.run(port = 5001, debug = True)
