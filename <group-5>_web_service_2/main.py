@@ -1,6 +1,7 @@
-from flask import Flask
+from flask import Flask, request
 from flask_restful import reqparse, abort, Api, Resource
 
+import requests
 import re
 import hashlib
 
@@ -41,7 +42,14 @@ def get_hash_key(long_url):
         hkeys.append(''.join(v))  
     return hkeys 
 
-# {Shortened_url : {url: Original_url}}
+# {Shortened_url : 
+#		{Original_url: 
+#			{owner: [Usernames]}
+#		}, 
+#		{Modified_url:
+#			{owner: [Usernames]}
+#		}
+# }
 map_url = {}
 
 parser = reqparse.RequestParser()
@@ -58,13 +66,22 @@ def is_url(candidate):
 	if mark not in candidate:
 		return False
 	search_obj = re.search("(.*)://(.*)", candidate, re.M|re.I)
-	if search_obj.group(1) not in schema:\
+	if search_obj.group(1) not in schema:
 		return False
 	if search_obj.group(2)[:-1] == ".":
 		return False
 	if "." not in search_obj.group(2):
 		return False
 	return True
+
+def is_token_valid(token):
+	data = {"Authorization": token}
+	username = requests.post("http://127.0.0.1:5001/verify", headers = data)
+	if username.status_code == 200:
+		uid = username.text
+		return uid
+	else:
+		return False
 
 class WithId(Resource):
 	# e.g. 127.0.0.1:5000/<shortened url>
@@ -76,20 +93,62 @@ class WithId(Resource):
 
 	# Delete a shortened url
 	def delete(self, id):
+		token = ""
+		if "Authorization" in request.headers:
+			token = request.headers["Authorization"]
+		else:
+			return 403
+		data = {"Authorization": token}
+		username = requests.post("http://127.0.0.1:5001/verify", headers = data)
+		uid = username.text
 		if id not in map_url:
 			return "error", 404
-		del map_url[id]
+		url_to_be_deleted = ""
+		for key in map_url[id]:
+			if uid in map_url[id][key]["owner"]:
+				url_to_be_deleted = key
+		if url_to_be_deleted == "":
+			return "forbidden", 403
+		else:
+			if len(map_url[id][url_to_be_deleted]["owner"]) > 1:
+				map_url[id][url_to_be_deleted]["owner"].remove(uid)
+			else:
+				del map_url[id][url_to_be_deleted]
+		if not map_url[id]:
+			del map_url[id]
 		return '', 204
 
-	# Create a new url map
+	# Update a url
 	def put(self, id):
 		if id not in map_url:
 			return "error", 404
 		args = parser.parse_args()
 		if not is_url(args['url']):
 			return "error", 400
-		task = {'url': args['url']}
-		map_url[id] = task
+		token = ""
+		if "Authorization" in request.headers:
+			token = request.headers["Authorization"]
+		else:
+			return "forbidden", 403
+		uid = is_token_valid(token)
+		if not uid:
+			return "forbidden", 403
+		url_to_be_modified = ""
+		for key in map_url[id]:
+			if uid in map_url[id][key]["owner"]:
+				url_to_be_modified = key
+		if url_to_be_modified == "":
+			return "forbidden", 403
+		else:
+			if len(map_url[id][url_to_be_modified]["owner"]) > 1:
+				map_url[id][url_to_be_modified]["owner"].remove(uid)
+			else:
+				del map_url[id][url_to_be_modified]
+		if args['url'] in map_url[id]:
+			map_url[id][args['url']]["owner"].append(uid)
+		else:
+			task = {args['url']: {"owner": [uid]}}
+			map_url[id].update(task)
 		return id, 200
 
 class WithoutId(Resource):
@@ -101,14 +160,31 @@ class WithoutId(Resource):
 	# Create shortened url
 	def post(self):
 		args = parser.parse_args()
+		uid = ""
+		token = ""
+		if "Authorization" in request.headers:
+			token = request.headers["Authorization"]
+		else:
+			return 403
+		uid = is_token_valid(token)
+		if not uid:
+			return 403
 		if not is_url(args['url']):
 			return "error", 400
 		short_url = get_hash_key(args['url'])
 		short_url = short_url[0]# For test
 		if short_url in map_url:
-			return short_url, 201
+			if args["url"] in map_url[short_url]:
+				if uid in map_url[short_url][args["url"]]["owner"]:
+					return short_url, 201
+				else:
+					map_url[short_url][args["url"]]["owner"].append(uid)
+					return short_url, 201
+			else:
+				map_url[short_url].update({args["url"]: {"owner": [uid]}})
+				return short_url, 201
 		else:
-			map_url[short_url] = {'url': args['url']}
+			map_url[short_url] = {args['url']: {"owner": [uid]}}
 			return short_url, 201
 
 	def delete(self):
