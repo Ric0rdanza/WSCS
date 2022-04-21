@@ -238,15 +238,22 @@ class WithoutId(Resource):
 		uid = is_token_valid(token)
 		if not uid:
 			return "forbidden", 403
+		delete_list = []
 		for key_short in map_url:
 			for key_long in map_url[key_short]:
+				# check the ownership
 				if uid in map_url[key_short][key_long]["owner"]:
 					if len(map_url[key_short][key_long]["owner"]) > 1:
 						map_url[key_short][key_long]["owner"].remove(uid)
 					else:
 						del map_url[key_short][key_long]
+					if not map_url[key_short]:
+						delete_list.append(key_short)
+						map_url[key_short].clear()
 				break
-		return 404
+		for i in delete_list:
+			del map_url[i]
+		return "", 404
 
 class Test(Resource):
 	def get(self):

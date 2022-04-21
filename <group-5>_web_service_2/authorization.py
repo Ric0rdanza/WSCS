@@ -44,7 +44,7 @@ class Login(Resource):
             return "error", 403
         if users[args["username"]] == args["password"]:
             return encode(args), 200
-        return users[args["username"]] + "incorrect username or password", 401
+        return "incorrect username or password", 401
 
 # Used to check correctness of token
 class Status(Resource):
