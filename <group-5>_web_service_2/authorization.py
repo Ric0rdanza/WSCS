@@ -1,10 +1,13 @@
 from flask import Flask, request
 from flask_restful import reqparse, abort, Api, Resource
+from flask_cors import CORS
+
 import jwt
 
 secret = "random_string"
 
 app = Flask(__name__)
+CORS(app)
 api = Api(app)
 
 # users = {username: password}
@@ -26,10 +29,16 @@ def decode(token):
         json = {}
     finally:
         return json
-
-class Signup(Resource):
+class CORS_Resource(Resource):
+    def options(self):
+        return {'Allow': '*'}, 200, {'Access-Control-Allow-Origin': '*',
+                                     'Access-Control-Allow-Methods': 'HEAD, OPTIONS, GET, POST, DELETE, PUT',
+                                     'Access-Control-Allow-Headers': 'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild',
+                                     }
+class Signup(CORS_Resource):
     def post(self):
         args = parser.parse_args()
+        print(args)
         if not args["username"] or not args["password"]:
             return "error", 403
         if args["username"] in users:

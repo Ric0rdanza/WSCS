@@ -1,0 +1,92 @@
+<html> 
+    <head> 
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    	<title>Cat vs. Dog</title>
+    	<meta name="keywords" content="" />
+    	<meta name="description" content="" />
+    	<link href="css/templatemo_style.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript"> 
+        	function getFileUrl(sourceId) { 
+        		var url; 
+        		
+        		if (navigator.userAgent.indexOf("MSIE")>=1) {
+        		url = document.getElementById(sourceId).value; 
+        		} 
+        		else if(navigator.userAgent.indexOf("Firefox")>0) {
+        		url = window.URL.createObjectURL(document.getElementById(sourceId).files.item(0)); 
+        		} 
+        		else if(navigator.userAgent.indexOf("Chrome")>0) {
+        		url = window.URL.createObjectURL(document.getElementById(sourceId).files.item(0)); 
+        		} 
+        		return url; 
+        	}
+        	
+        	function preImg(sourceId, targetId) { 
+        		var url = getFileUrl(sourceId); 
+        		var imgPre = document.getElementById(targetId); 
+        		imgPre.src = url; 
+        	} 
+        </script> 
+        <title>首页</title>
+    </head> 
+    <body> 
+    
+    <div id="templatemo_body_wrapper">
+    <div id="templatemo_wrapper">
+        
+        <div id="templatemo_header">
+                
+            <div id="site_title">
+                <a href="#">Cat 
+                	<span>vs.</span>
+                	 Dog
+                    <span class="tagline">Designed by Boss of AA420</span>
+                </a>
+            </div> <!-- end of site_title -->
+            <div class="cleaner"></div>
+            
+        </div> <!-- end of header -->
+        
+        <div id="templatemo_menu">
+            <ul>
+                <li><a href="index.html"><span></span>Home</a></li>
+                <li><a href="catvsdog.html" class="current"><span></span>Cat vs. Dog</a></li>
+                <li><a href="details.html"><span></span>Details</a></li>
+                <li><a href="#"><span></span>Donate</a></li>
+            </ul>    	
+
+        </div> <!-- end of templatemo_menu -->
+        
+        <div id="templatemo_main">
+    	
+        <div id="templatemo_content">
+        
+        	<div class="post_box">
+            	
+                <h2>1st step | Choose Your Picture</h2>
+                <div class="news_meta">Accepted Format: jpg, jpeg, png</div>
+                <div class="image_wrapper"><img src="images/cvd.jpg" id="imgPre" style="display: block"/></div>
+              	<div class="cleaner"></div>
+              	<form action="process.php" method="post" enctype="multipart/form-data">
+                	<input type="file" name="imgOne" id="imgOne" onchange="preImg(this.id,'imgPre');" /> 
+                	<input type="submit" value="Submit" />
+                </form>
+                <h2>2nd step | Wait for your Result in New Page</h2>
+            <div class="cleaner"></div>
+        </div>
+        <div class="cleaner"></div>
+        </div>
+        <div class="cleaner"></div>
+        </div>
+        
+        <div id="templatemo_footer_wrapper">
+        	<div id="templatemo_footer">
+        		<div>
+            		Copyright © 2019 <a href="#">Your Company Name</a>  |  Contact: 1161002056@cnu.edu.cn
+        		</div>
+            	<div class="cleaner"></div>
+            </div>
+        </div>
+        
+    </body> 
+</html> 

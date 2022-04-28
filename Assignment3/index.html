@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>URL-shortener</title>
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<link href="css/templatemo_style.css" rel="stylesheet" type="text/css" />
+<script language="javascript" type="text/javascript">
+function clearText(field)
+{
+    if (field.defaultValue == field.value) field.value = '';
+    else if (field.value == '') field.value = field.defaultValue;
+}
+</script>
+</head>
+<body>
+<script type="text/javascript">
+    var jwt = ""
+</script>
+<div id="templatemo_body_wrapper">
+<div id="templatemo_wrapper">
+    
+    <div id="templatemo_header">
+            
+        <div id="site_title">
+            <a href="index.html">
+            	<span>URL</span>
+            	 Shortener
+                <span class="tagline">Group-5</span>
+            </a>
+        </div> <!-- end of site_title -->
+        <div class="cleaner"></div>
+        
+    </div> <!-- end of header -->
+    
+    <div id="templatemo_menu">
+        <ul>
+            <li><a href="index.html" class="current"><span></span>Home</a></li>
+            <li><a href="login.html"><span></span>Shortener</a></li>
+            <li><a href="details.html"><span></span>Manage URLs</a></li>
+        </ul>    	
+        
+    </div> <!-- end of templatemo_menu -->
+    
+    <div id="templatemo_main">
+    	
+        <div id="templatemo_content">
+        
+        	<div class="post_box">
+                <h2>Input a shortened URL</h2>		
+                <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;"><form action="localhost:5001" method="get"><input type="text" /><input type="submit" value="GO"/></form></div>
+              <div class="cleaner"></div>
+            </div>
+            
+            <div class="post_box">
+                <h2>Create a short URL</h2>		
+                <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;"><form action="localhost:5001" method="post"><input type="text" /><input type="submit" value="Create"/></form></div>
+                <div id="no_jwt" style="display: none;">
+                    <script type="text/javascript">
+                        var req = new XMLHttpRequest()
+                        function login() {
+                            userinfo = {
+                                "username": document.getElementById("uid").value,
+                                "password": document.getElementById("psw").value
+                            }
+                            req.open("POST", "http://127.0.0.1:5001/users/login", false)
+                            req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+                            var payload = "username=" + document.getElementById("uid").value + "&password=" + document.getElementById("psw").value
+                            console.log(payload)
+                            req.send(payload)
+                            jwt = req.responseText
+                            if (jwt != '') {
+                                document.getElementById("no_jwt").style.display="none"
+                                document.getElementById("jwt").style.display=""
+                            }
+                        }
+                    </script>
+                    <p align="justify">You need login to proceed <button type="button" onclick="dianwo()">GO>>></button>
+                    <div class="zhezhao" id='zhezhao'>
+                    <div class="tankuang">
+                    <div id="header">
+                        <p>Username: <input type="text" id="uid"/></p>
+                        <p>Password: <input type="password" id="psw" /></p>
+                        <button type="button" onclick="login()">Login</button>
+                        <a href="newaccount.html">New account</a>
+                        <div id="header-right" onclick="hidder()">Cancel</div>
+                    </div>
+                    </div>
+                    </div>
+                </div>
+                <div id="jwt" style="display: none;">
+                    <p align="justify" onclick="logout()">Logout</p>
+                </div>
+                <script type="text/javascript">
+                    if (jwt == "") {
+                        document.getElementById("no_jwt").style.display=""
+                        document.getElementById("jwt").style.display="none"
+                    }
+                    function logout() {
+                        jwt = ""
+                        document.getElementById("no_jwt").style.display=""
+                        document.getElementById("jwt").style.display="none"
+                    }
+                </script>
+                <script type="text/javascript">
+                 document.getElementById('zhezhao').style.display="none";
+                 function dianwo(){
+                  document.getElementById('zhezhao').style.display="";
+                 }
+                 function hidder(){
+                  document.getElementById('zhezhao').style.display="none";
+                 }
+                </script></p>
+                <div class="cleaner"></div>
+            </div>
+
+            
+            
+           <div class="post_box">
+            
+                <h2>Manage URLs</h2>
+                <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;">
+                    <form action="localhost:5001" method="put">
+                        <p>Short URL: <input type="text" name="short" id="short_url"/></p>
+                        <p>Long URL: <input type="text" name="long" id="new_long_url" /></p>
+                        <p><input type="submit" value="Modify"/></p>
+                    </form>
+                </div>
+                <p align="justify">You need login to proceed <a href="login.html" class="continue">GO>>></a></p>
+                <div class="cleaner"></div>
+          </div>
+
+          <div class="post_box pb_last">
+            
+            <h2>Delete URLs</h2>		
+            <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;">
+                <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;"></div>
+                <form action="delete">
+                    <p><input type="text" name="short" id="short_url_delete"/><input type="submit" value="Delete short URL" /></p>
+                </form>
+                <form action="delete">
+                    <input type="submit" value="Delete all" />
+                </form>
+            </div>
+         <p align="justify">You need login to proceed <a href="login.html" class="continue">GO>>></a></p>
+         <div class="cleaner"></div>
+        </div>
+        </div>
+    	<div class="cleaner"></div>
+    </div>
+    
+</div>
+<div class="cleaner"></div>
+</div>
+
+
+<div id="templatemo_footer_wrapper">
+	<div id="templatemo_footer">
+		<div>
+    		 
+		</div>
+    	<div class="cleaner"></div>
+    </div>
+</div>
+
+</body>
+</html>
