@@ -29,13 +29,8 @@ def decode(token):
         json = {}
     finally:
         return json
-class CORS_Resource(Resource):
-    def options(self):
-        return {'Allow': '*'}, 200, {'Access-Control-Allow-Origin': '*',
-                                     'Access-Control-Allow-Methods': 'HEAD, OPTIONS, GET, POST, DELETE, PUT',
-                                     'Access-Control-Allow-Headers': 'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild',
-                                     }
-class Signup(CORS_Resource):
+
+class Signup(Resource):
     def post(self):
         args = parser.parse_args()
         print(args)
