@@ -64,15 +64,17 @@ function clearText(field)
                                 "username": document.getElementById("uid").value,
                                 "password": document.getElementById("psw").value
                             }
-                            req.open("POST", "http://127.0.0.1:5001/users/login", false)
+                            req.open("POST", "http://127.0.0.1:5000/auth/users/login", false)
                             req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
                             var payload = "username=" + document.getElementById("uid").value + "&password=" + document.getElementById("psw").value
-                            console.log(payload)
                             req.send(payload)
                             jwt = req.responseText
                             if (jwt != '') {
                                 document.getElementById("no_jwt").style.display="none"
                                 document.getElementById("jwt").style.display=""
+                            }
+                            else {
+                                alert("Incorrect username or password")
                             }
                         }
                     </script>
@@ -83,7 +85,7 @@ function clearText(field)
                         <p>Username: <input type="text" id="uid"/></p>
                         <p>Password: <input type="password" id="psw" /></p>
                         <button type="button" onclick="login()">Login</button>
-                        <a href="newaccount.html">New account</a>
+                        <a href="create_account.html">New account</a>
                         <div id="header-right" onclick="hidder()">Cancel</div>
                     </div>
                     </div>
