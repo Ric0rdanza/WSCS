@@ -46,16 +46,33 @@ function clearText(field)
     <div id="templatemo_main">
     	
         <div id="templatemo_content">
-        
+            <script type="text/javascript">
+                var retrieve_req = new XMLHttpRequest()
+                function retrieve_short() {
+                    var short_url = document.getElementById("get_short_url").value
+                    retrieve_req.open("GET", "http://127.0.0.1:5000/main/" + short_url, false)
+                    retrieve_req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+                    retrieve_req.send()
+                    var long_urls = JSON.parse(retrieve_req.response)
+                    if (long_urls.length > 1) {
+                        alert("This shortened URL are mapping to multiple longer URLs!\n\n" + long_urls)
+                    }
+                    else {
+                        alert(long_urls)
+                    }
+                }
+            </script>
         	<div class="post_box">
                 <h2>Input a shortened URL</h2>		
-                <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;"><form action="localhost:5001" method="get"><input type="text" /><input type="submit" value="GO"/></form></div>
+                <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;">
+                    <form action="localhost:5001" method="get">
+                        <input type="text" id="get_short_url"/>
+                        <button style="text-align: justify; padding-left: 10px;" onclick="retrieve_short()">GO</button>
+                    </form>
+                </div>
               <div class="cleaner"></div>
             </div>
-            
             <div class="post_box">
-                <h2>Create a short URL</h2>		
-                <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;"><form action="localhost:5001" method="post"><input type="text" /><input type="submit" value="Create"/></form></div>
                 <div id="no_jwt" style="display: none;">
                     <script type="text/javascript">
                         var req = new XMLHttpRequest()
@@ -69,24 +86,30 @@ function clearText(field)
                             var payload = "username=" + document.getElementById("uid").value + "&password=" + document.getElementById("psw").value
                             req.send(payload)
                             jwt = req.responseText
-                            if (jwt != '') {
+                            code = req.status
+                            console.log(code)
+                            if (code != 200) {
+                                alert("Incorrect username or password")
+                            }
+                            else {
                                 document.getElementById("no_jwt").style.display="none"
                                 document.getElementById("jwt").style.display=""
                             }
-                            else {
-                                alert("Incorrect username or password")
-                            }
                         }
                     </script>
-                    <p align="justify">You need login to proceed <button type="button" onclick="dianwo()">GO>>></button>
+                    <p align="justify">You need login to use features below <button type="button" onclick="dianwo()">GO>>></button>
                     <div class="zhezhao" id='zhezhao'>
                     <div class="tankuang">
                     <div id="header">
-                        <p>Username: <input type="text" id="uid"/></p>
-                        <p>Password: <input type="password" id="psw" /></p>
-                        <button type="button" onclick="login()">Login</button>
-                        <a href="create_account.html">New account</a>
-                        <div id="header-right" onclick="hidder()">Cancel</div>
+                        <p style="text-align: justify; padding-top: 20px; padding-left: 20px;">Username: <input type="text" id="uid"/></p>
+                        <p style="text-align: justify; padding-top: 20px; padding-left: 20px;">Password: <input type="password" id="psw" /></p>
+                        <p style="text-align: justify; padding-top: 20px; padding-left: 20px;">
+                            <button type="button" onclick="login()">Login</button>
+                            <a href="create_account.html" style="text-align: justify; padding-left: 20px">New account</a>
+                        </p>
+                        <div id="header-right">
+                            <p style="text-align: justify; padding-top: 20px; padding-left: 20px;"><button onclick="hidder()">Cancel</button></p>
+                        </div>
                     </div>
                     </div>
                     </div>
@@ -114,13 +137,42 @@ function clearText(field)
                   document.getElementById('zhezhao').style.display="none";
                  }
                 </script></p>
+            </div>
+            <div class="post_box">
+                <h2>Create a short URL</h2>		
+                <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;">
+                    <script type="text/javascript">
+                        var post_req = new XMLHttpRequest()
+                        function post_long() {
+                            var long_url = document.getElementById("post_long_url").value
+                            post_req.open("POST", "http://127.0.0.1:5000/main/", false)
+                            post_req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+                            token = "Bearer" + " " + JSON.parse(jwt)
+                            console.log(token)
+                            post_req.setRequestHeader("Authorization", token)
+                            payload = "url=" + long_url
+                            post_req.send(payload)
+                            var short_url = post_req.responseText
+                            if (post_req.status == 201) {
+                                alert("URL shortened!\n\n" + short_url)
+                            }
+                            else {
+                                alert("Failed to shorten the URL")
+                            }
+                        }
+                    </script>
+                    <form>
+                        <input type="text" id="post_long_url"/>
+                        <button style="text-align: justify; padding-left: 10px;" onclick="post_long()">Create</button>
+                    </form>
+                </div>
+                
                 <div class="cleaner"></div>
             </div>
 
             
             
            <div class="post_box">
-            
                 <h2>Manage URLs</h2>
                 <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;">
                     <form action="localhost:5001" method="put">
@@ -129,7 +181,6 @@ function clearText(field)
                         <p><input type="submit" value="Modify"/></p>
                     </form>
                 </div>
-                <p align="justify">You need login to proceed <a href="login.html" class="continue">GO>>></a></p>
                 <div class="cleaner"></div>
           </div>
 
@@ -145,7 +196,6 @@ function clearText(field)
                     <input type="submit" value="Delete all" />
                 </form>
             </div>
-         <p align="justify">You need login to proceed <a href="login.html" class="continue">GO>>></a></p>
          <div class="cleaner"></div>
         </div>
         </div>
