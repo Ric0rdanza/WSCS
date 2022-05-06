@@ -183,7 +183,41 @@ function clearText(field)
                 <div class="cleaner"></div>
             </div>
 
-            
+            <div class="post_box">
+                <h2>Retrieve all</h2>		
+                <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;">
+                    <script type="text/javascript">
+                        var req_retrieve_all = new XMLHttpRequest()
+                        function retrieve_all() {
+                            if (jwt == "") {
+                                alert("Not logged in")
+                                return
+                            }
+                            req_retrieve_all.open("GET", "http://127.0.0.1:5000/main/", false)
+                            req_retrieve_all.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+                            token = "Bearer" + " " + JSON.parse(jwt)
+                            console.log(token)
+                            req_retrieve_all.setRequestHeader("Authorization", token)
+                            req_retrieve_all.send()
+                            var long_urls = req_retrieve_all.responseText
+                            switch (req_retrieve_all.status) {
+                                case 200:
+                                    alert(long_urls)
+                                    break
+                                case 403:
+                                    alert("Authorization failed")
+                                    break
+                            }
+                            
+                        }
+                    </script>
+                    <form>
+                        <input type="button" style="text-align: justify; padding-left: 10px;" onclick="retrieve_all()" value="Retrieve"/>
+                    </form>
+                </div>
+                
+                <div class="cleaner"></div>
+            </div>
             
            <div class="post_box">
                 <h2>Manage URLs</h2>
@@ -230,7 +264,6 @@ function clearText(field)
             
             <h2>Delete URLs</h2>		
             <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;">
-                <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;"></div>
                 <script type="text/javascript">
                     function delete_single() {
                         if (jwt == "") {
@@ -282,10 +315,13 @@ function clearText(field)
                         }
                     }
                 </script>
-                <form>
-                    <p><input type="text" name="short" id="short_url_delete"/><input type="button" value="Delete short URL" onclick="delete_single()" /></p>
+                <form style="text-align: center;">
+                    <p>
+                        <input type="text" name="short" id="short_url_delete"/>
+                        <input type="button" style="text-align: justify; padding-left: 10px;" value="Delete short URL" onclick="delete_single()" />
+                    </p>
                 </form>
-                <form>
+                <form style="text-align: center; padding-left: 10px; padding-top: 10px;">
                     <input type="button" value="Delete all" onclick="delete_multiple()" />
                 </form>
             </div>
