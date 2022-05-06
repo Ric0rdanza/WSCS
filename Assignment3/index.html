@@ -50,6 +50,10 @@ function clearText(field)
                 var retrieve_req = new XMLHttpRequest()
                 function retrieve_short() {
                     var short_url = document.getElementById("get_short_url").value
+                    if (short_url == "") {
+                        alert("You must enter a short URL!")
+                        return
+                    }
                     retrieve_req.open("GET", "http://127.0.0.1:5000/main/" + short_url, false)
                     retrieve_req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
                     retrieve_req.send()
@@ -65,9 +69,9 @@ function clearText(field)
         	<div class="post_box">
                 <h2>Input a shortened URL</h2>		
                 <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;">
-                    <form action="localhost:5001" method="get">
+                    <form>
                         <input type="text" id="get_short_url"/>
-                        <button style="text-align: justify; padding-left: 10px;" onclick="retrieve_short()">GO</button>
+                        <input type="button" style="text-align: justify; padding-left: 10px;" onclick="retrieve_short()" value="GO" />
                     </form>
                 </div>
               <div class="cleaner"></div>
@@ -144,6 +148,10 @@ function clearText(field)
                     <script type="text/javascript">
                         var post_req = new XMLHttpRequest()
                         function post_long() {
+                            if (jwt == "") {
+                                alert("Not logged in")
+                                return
+                            }
                             var long_url = document.getElementById("post_long_url").value
                             post_req.open("POST", "http://127.0.0.1:5000/main/", false)
                             post_req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
@@ -153,17 +161,22 @@ function clearText(field)
                             payload = "url=" + long_url
                             post_req.send(payload)
                             var short_url = post_req.responseText
-                            if (post_req.status == 201) {
-                                alert("URL shortened!\n\n" + short_url)
+                            switch (post_req.status) {
+                                case 201:
+                                    alert("URL shortened!\n\n" + short_url)
+                                    break
+                                case 403:
+                                    alert("You already modified this URL")
+                                    break
+                                case 400:
+                                    alert("Input not a URL")
                             }
-                            else {
-                                alert("Failed to shorten the URL")
-                            }
+                            
                         }
                     </script>
                     <form>
                         <input type="text" id="post_long_url"/>
-                        <button style="text-align: justify; padding-left: 10px;" onclick="post_long()">Create</button>
+                        <input type="button" style="text-align: justify; padding-left: 10px;" onclick="post_long()" value="Create"/>
                     </form>
                 </div>
                 
@@ -175,10 +188,39 @@ function clearText(field)
            <div class="post_box">
                 <h2>Manage URLs</h2>
                 <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;">
-                    <form action="localhost:5001" method="put">
-                        <p>Short URL: <input type="text" name="short" id="short_url"/></p>
-                        <p>Long URL: <input type="text" name="long" id="new_long_url" /></p>
-                        <p><input type="submit" value="Modify"/></p>
+                    <script type="text/javascript">
+                        function url_modify() {
+                            if (jwt == "") {
+                                alert("Not logged in")
+                                return
+                            }
+                            var req_modify = new XMLHttpRequest()
+                            var short_url = document.getElementById("short_url_m").value
+                            req_modify.open("PUT", "http://127.0.0.1:5000/main/" + short_url, false)
+                            req_modify.setRequestHeader("Authorization", "Bearer " + JSON.parse(jwt))
+                            req_modify.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+                            payload = "url=" + document.getElementById("long_url_m").value
+                            req_modify.send(payload)
+                            switch(req_modify.status) {
+                                case 404:
+                                    alert("Not found short URL")
+                                    break
+                                case 400:
+                                    alert("Not a URL")
+                                    break
+                                case 403:
+                                    alert("Authorization failed")
+                                    break
+                                case 200:
+                                    alert("Modification success")
+                                    break
+                            }
+                        }
+                    </script>
+                    <form>
+                        <p style="text-align: center; padding-top: 10px;">Short URL: <input type="text" name="short" id="short_url_m"/></p>
+                        <p style="text-align: center; padding-top: 10px;">Long URL: <input type="text" name="long" id="long_url_m" /></p>
+                        <p style="text-align: center; padding-top: 10px;"><input type="button" value="Modify" onclick="url_modify()"/></p>
                     </form>
                 </div>
                 <div class="cleaner"></div>
@@ -189,11 +231,62 @@ function clearText(field)
             <h2>Delete URLs</h2>		
             <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;">
                 <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;"></div>
-                <form action="delete">
-                    <p><input type="text" name="short" id="short_url_delete"/><input type="submit" value="Delete short URL" /></p>
+                <script type="text/javascript">
+                    function delete_single() {
+                        if (jwt == "") {
+                            alert("Not logged in")
+                            return
+                        }
+                        var req_delete = new XMLHttpRequest()
+                        var candidate = document.getElementById("short_url_delete").value
+                        req_delete.open("DELETE", "http://127.0.0.1:5000/main/" + candidate)
+                        req_delete.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+                        req_delete.setRequestHeader("Authorization", "Bearer " + JSON.parse(jwt))
+                        req_delete.send()
+                        console.log(req_delete.status)
+                        switch(req_delete.status) {
+                            case 404:
+                                alert("Not found short URL")
+                                break
+                            case 403:
+                                alert("Authorization failed")
+                                break
+                            case 204:
+                                alert("Delete successful")
+                                break
+                            case 0:
+                                alert("Delete successful")
+                                break
+                        }
+                    }
+                    function delete_multiple() {
+                        if (jwt == "") {
+                            alert("Not logged in")
+                            return
+                        }
+                        var req_delete = new XMLHttpRequest()
+                        req_delete.open("DELETE", "http://127.0.0.1:5000/main/")
+                        req_delete.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+                        req_delete.setRequestHeader("Authorization", "Bearer " + JSON.parse(jwt))
+                        req_delete.send()
+                        switch(req_delete.status) {
+                            case 404:
+                                alert("Delete successful")
+                                break
+                            case 403:
+                                alert("Authorization failed")
+                                break
+                            case 0:
+                                alert("Delete successful")
+                                break
+                        }
+                    }
+                </script>
+                <form>
+                    <p><input type="text" name="short" id="short_url_delete"/><input type="button" value="Delete short URL" onclick="delete_single()" /></p>
                 </form>
-                <form action="delete">
-                    <input type="submit" value="Delete all" />
+                <form>
+                    <input type="button" value="Delete all" onclick="delete_multiple()" />
                 </form>
             </div>
          <div class="cleaner"></div>
