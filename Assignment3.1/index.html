@@ -1,0 +1,350 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>URL-shortener</title>
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<link href="css/templatemo_style.css" rel="stylesheet" type="text/css" />
+<script language="javascript" type="text/javascript">
+var server = "http://145.100.134.52:5000/"
+function clearText(field)
+{
+    if (field.defaultValue == field.value) field.value = '';
+    else if (field.value == '') field.value = field.defaultValue;
+}
+</script>
+</head>
+<body>
+<script type="text/javascript">
+    var jwt = ""
+</script>
+<div id="templatemo_body_wrapper">
+<div id="templatemo_wrapper">
+    
+    <div id="templatemo_header">
+            
+        <div id="site_title">
+            <a href="index.html">
+            	<span>URL</span>
+            	 Shortener
+                <span class="tagline">Group-5</span>
+            </a>
+        </div> <!-- end of site_title -->
+        <div class="cleaner"></div>
+        
+    </div> <!-- end of header -->
+    
+    <div id="templatemo_menu">
+        <ul>
+            <li><a href="index.html" class="current"><span></span>Home</a></li>
+            <li><a href="login.html"><span></span>Shortener</a></li>
+            <li><a href="details.html"><span></span>Manage URLs</a></li>
+        </ul>    	
+        
+    </div> <!-- end of templatemo_menu -->
+    
+    <div id="templatemo_main">
+    	
+        <div id="templatemo_content">
+            <script type="text/javascript">
+                var retrieve_req = new XMLHttpRequest()
+                function retrieve_short() {
+                    var short_url = document.getElementById("get_short_url").value
+                    if (short_url == "") {
+                        alert("You must enter a short URL!")
+                        return
+                    }
+                    retrieve_req.open("GET", server + "main/" + short_url, false)
+                    retrieve_req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+                    retrieve_req.send()
+                    var long_urls = JSON.parse(retrieve_req.response)
+                    if (long_urls.length > 1) {
+                        alert("This shortened URL are mapping to multiple longer URLs!\n\n" + long_urls)
+                    }
+                    else {
+                        alert(long_urls)
+                    }
+                }
+            </script>
+        	<div class="post_box">
+                <h2>Input a shortened URL</h2>		
+                <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;">
+                    <form>
+                        <input type="text" id="get_short_url"/>
+                        <input type="button" style="text-align: justify; padding-left: 10px;" onclick="retrieve_short()" value="GO" />
+                    </form>
+                </div>
+              <div class="cleaner"></div>
+            </div>
+            <div class="post_box">
+                <div id="no_jwt" style="display: none;">
+                    <script type="text/javascript">
+                        var req = new XMLHttpRequest()
+                        function login() {
+                            userinfo = {
+                                "username": document.getElementById("uid").value,
+                                "password": document.getElementById("psw").value
+                            }
+                            req.open("POST", server + "auth/users/login", false)
+                            req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+                            var payload = "username=" + document.getElementById("uid").value + "&password=" + document.getElementById("psw").value
+                            req.send(payload)
+                            jwt = req.responseText
+                            code = req.status
+                            console.log(code)
+                            if (code != 200) {
+                                alert("Incorrect username or password")
+                            }
+                            else {
+                                document.getElementById("no_jwt").style.display="none"
+                                document.getElementById("jwt").style.display=""
+                            }
+                        }
+                    </script>
+                    <p align="justify">You need login to use features below <button type="button" onclick="dianwo()">GO>>></button>
+                    <div class="zhezhao" id='zhezhao'>
+                    <div class="tankuang">
+                    <div id="header">
+                        <p style="text-align: justify; padding-top: 20px; padding-left: 20px;">Username: <input type="text" id="uid"/></p>
+                        <p style="text-align: justify; padding-top: 20px; padding-left: 20px;">Password: <input type="password" id="psw" /></p>
+                        <p style="text-align: justify; padding-top: 20px; padding-left: 20px;">
+                            <button type="button" onclick="login()">Login</button>
+                            <a href="create_account.html" style="text-align: justify; padding-left: 20px">New account</a>
+                        </p>
+                        <div id="header-right">
+                            <p style="text-align: justify; padding-top: 20px; padding-left: 20px;"><button onclick="hidder()">Cancel</button></p>
+                        </div>
+                    </div>
+                    </div>
+                    </div>
+                </div>
+                <div id="jwt" style="display: none;">
+                    <p align="justify" onclick="logout()">Logout</p>
+                </div>
+                <script type="text/javascript">
+                    if (jwt == "") {
+                        document.getElementById("no_jwt").style.display=""
+                        document.getElementById("jwt").style.display="none"
+                    }
+                    function logout() {
+                        jwt = ""
+                        document.getElementById("no_jwt").style.display=""
+                        document.getElementById("jwt").style.display="none"
+                    }
+                </script>
+                <script type="text/javascript">
+                 document.getElementById('zhezhao').style.display="none";
+                 function dianwo(){
+                  document.getElementById('zhezhao').style.display="";
+                 }
+                 function hidder(){
+                  document.getElementById('zhezhao').style.display="none";
+                 }
+                </script></p>
+            </div>
+            <div class="post_box">
+                <h2>Create a short URL</h2>		
+                <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;">
+                    <script type="text/javascript">
+                        var post_req = new XMLHttpRequest()
+                        function post_long() {
+                            if (jwt == "") {
+                                alert("Not logged in")
+                                return
+                            }
+                            var long_url = document.getElementById("post_long_url").value
+                            post_req.open("POST", server + "main/", false)
+                            post_req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+                            token = "Bearer" + " " + JSON.parse(jwt)
+                            console.log(token)
+                            post_req.setRequestHeader("Authorization", token)
+                            payload = "url=" + long_url
+                            post_req.send(payload)
+                            var short_url = post_req.responseText
+                            switch (post_req.status) {
+                                case 201:
+                                    alert("URL shortened!\n\n" + short_url)
+                                    break
+                                case 403:
+                                    alert("You already modified this URL")
+                                    break
+                                case 400:
+                                    alert("Input not a URL")
+                            }
+                            
+                        }
+                    </script>
+                    <form>
+                        <input type="text" id="post_long_url"/>
+                        <input type="button" style="text-align: justify; padding-left: 10px;" onclick="post_long()" value="Create"/>
+                    </form>
+                </div>
+                
+                <div class="cleaner"></div>
+            </div>
+
+            <div class="post_box">
+                <h2>Retrieve all</h2>		
+                <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;">
+                    <script type="text/javascript">
+                        var req_retrieve_all = new XMLHttpRequest()
+                        function retrieve_all() {
+                            if (jwt == "") {
+                                alert("Not logged in")
+                                return
+                            }
+                            req_retrieve_all.open("GET", server + "main/", false)
+                            req_retrieve_all.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+                            token = "Bearer" + " " + JSON.parse(jwt)
+                            console.log(token)
+                            req_retrieve_all.setRequestHeader("Authorization", token)
+                            req_retrieve_all.send()
+                            var long_urls = req_retrieve_all.responseText
+                            switch (req_retrieve_all.status) {
+                                case 200:
+                                    alert(long_urls)
+                                    break
+                                case 403:
+                                    alert("Authorization failed")
+                                    break
+                            }
+                            
+                        }
+                    </script>
+                    <form>
+                        <input type="button" style="text-align: justify; padding-left: 10px;" onclick="retrieve_all()" value="Retrieve"/>
+                    </form>
+                </div>
+                
+                <div class="cleaner"></div>
+            </div>
+            
+           <div class="post_box">
+                <h2>Manage URLs</h2>
+                <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;">
+                    <script type="text/javascript">
+                        function url_modify() {
+                            if (jwt == "") {
+                                alert("Not logged in")
+                                return
+                            }
+                            var req_modify = new XMLHttpRequest()
+                            var short_url = document.getElementById("short_url_m").value
+                            req_modify.open("PUT", server + "main/" + short_url, false)
+                            req_modify.setRequestHeader("Authorization", "Bearer " + JSON.parse(jwt))
+                            req_modify.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+                            payload = "url=" + document.getElementById("long_url_m").value
+                            req_modify.send(payload)
+                            switch(req_modify.status) {
+                                case 404:
+                                    alert("Not found short URL")
+                                    break
+                                case 400:
+                                    alert("Not a URL")
+                                    break
+                                case 403:
+                                    alert("Authorization failed")
+                                    break
+                                case 200:
+                                    alert("Modification success")
+                                    break
+                            }
+                        }
+                    </script>
+                    <form>
+                        <p style="text-align: center; padding-top: 10px;">Short URL: <input type="text" name="short" id="short_url_m"/></p>
+                        <p style="text-align: center; padding-top: 10px;">Long URL: <input type="text" name="long" id="long_url_m" /></p>
+                        <p style="text-align: center; padding-top: 10px;"><input type="button" value="Modify" onclick="url_modify()"/></p>
+                    </form>
+                </div>
+                <div class="cleaner"></div>
+          </div>
+
+          <div class="post_box pb_last">
+            
+            <h2>Delete URLs</h2>		
+            <div style="text-align: center; padding-top: 40px; padding-bottom: 40px;">
+                <script type="text/javascript">
+                    function delete_single() {
+                        if (jwt == "") {
+                            alert("Not logged in")
+                            return
+                        }
+                        var req_delete = new XMLHttpRequest()
+                        var candidate = document.getElementById("short_url_delete").value
+                        req_delete.open("DELETE", server + "main/" + candidate)
+                        req_delete.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+                        req_delete.setRequestHeader("Authorization", "Bearer " + JSON.parse(jwt))
+                        req_delete.send()
+                        console.log(req_delete.status)
+                        switch(req_delete.status) {
+                            case 404:
+                                alert("Not found short URL")
+                                break
+                            case 403:
+                                alert("Authorization failed")
+                                break
+                            case 204:
+                                alert("Delete successful")
+                                break
+                            case 0:
+                                alert("Delete successful")
+                                break
+                        }
+                    }
+                    function delete_multiple() {
+                        if (jwt == "") {
+                            alert("Not logged in")
+                            return
+                        }
+                        var req_delete = new XMLHttpRequest()
+                        req_delete.open("DELETE", server + "main/")
+                        req_delete.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+                        req_delete.setRequestHeader("Authorization", "Bearer " + JSON.parse(jwt))
+                        req_delete.send()
+                        switch(req_delete.status) {
+                            case 404:
+                                alert("Delete successful")
+                                break
+                            case 403:
+                                alert("Authorization failed")
+                                break
+                            case 0:
+                                alert("Delete successful")
+                                break
+                        }
+                    }
+                </script>
+                <form style="text-align: center;">
+                    <p>
+                        <input type="text" name="short" id="short_url_delete"/>
+                        <input type="button" style="text-align: justify; padding-left: 10px;" value="Delete short URL" onclick="delete_single()" />
+                    </p>
+                </form>
+                <form style="text-align: center; padding-left: 10px; padding-top: 10px;">
+                    <input type="button" value="Delete all" onclick="delete_multiple()" />
+                </form>
+            </div>
+         <div class="cleaner"></div>
+        </div>
+        </div>
+    	<div class="cleaner"></div>
+    </div>
+    
+</div>
+<div class="cleaner"></div>
+</div>
+
+
+<div id="templatemo_footer_wrapper">
+	<div id="templatemo_footer">
+		<div>
+    		 
+		</div>
+    	<div class="cleaner"></div>
+    </div>
+</div>
+
+</body>
+</html>
