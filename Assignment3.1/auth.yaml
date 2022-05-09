@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: auth
+  namespace: default
+  labels:
+    k8s-app: auth
+    environment: dev
+  annotations:
+    name: auth
+spec:
+  containers:
+  - name: auth
+    image: odonataprime/auth:multiplatform
+    imagePullPolicy: IfNotPresent
+    ports:
+    - name: httpd
+      containerPort: 8000
+      #除非绝对必要，否则不要为 Pod 指定 hostPort。 将 Pod 绑定到hostPort时，它会限制 Pod 可以调度的位置数
+      #DaemonSet 中的 Pod 可以使用 hostPort，从而可以通过节点 IP 访问到 Pod；因为DaemonSet模式下Pod不会被调度到其他节点。
+      #一般情况下 containerPort与hostPort值相同
+      hostPort: 5001     #可以通过宿主机+hostPort的方式访问该Pod。例如：pod在/调度到了k8s-node02【172.16.1.112】，那么该Pod可以通过172.16.1.112:8090方式进行访问。
+      protocol: TCP
